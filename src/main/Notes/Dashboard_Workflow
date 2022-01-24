@@ -1,0 +1,110 @@
+**********************************
+            ONSJHJSA
+**********************************
+
+** WORKFLOW for Production Dashboard:
+
+==> There are three main steps to create a Dashboard on React JS front end.
+I. Develop a SQL query with the required fields on axes of the Dashboard.
+II. Create a REST API with GET request to generate the endpoint and transfer the payload.
+III. Create a Dashboard in React using react-chart-2 library and axios to consume the REST endpoint.
+
+** DETAILED WORKFLOW (For Daily Production graph):
+I. Develop a native sql query to get the required fields.
+
+1. In "Repo_Production_Material" repository interface create a abstract (skeleton) method. This method has the
+@Query parameter and pass the native SQL statement to fetch the data.
+-> Other mandatory annotations are @Modifying and @Transactional.
+
+-> String query statement:
+    I need daily production weight in tons, material type and date. Here, the database schema has 3 NF so I need
+    to join the "Fact_Production_Table" material id column with "Dim_Material" table's material id. I cast the date into
+    Date datatype and use "AS" keyword to provide significant name.
+
+        public static final String sql_dash_production =
+            "Select cast(prod.date AS date) AS Date, \n" +
+            "\t\tmtr.material_type AS Material_Type, \n" +
+            "\t\tSUM(prod.total_weight_tons) AS [Total_Weight]  \n" +
+            "  from production_dim prod \n" +
+            "  Inner join material_dim mtr\n" +
+            "  ON prod.material_dim_material_id = mtr.material_id\n" +
+            "  Group By prod.date, mtr.material_type\n" +
+            "  Order By prod.date, mtr.material_type";
+
+2. Another important thing is to specify the payload structure of the data returned from the SQL native query.
+NOTE: List<Map<String,Object>> returns the data in required list of JSON payload. Map<String,Object> data structure
+map each Column name(string) with data (Object).
+
+    @Modifying
+    @Transactional
+    @Query(value = sql_dash_production, nativeQuery = true)
+    List<Map<String,Object>> grp_Production();
+
+--------------------------------------------------------------------------
+II. Create a REST API with GET request to generate the endpoint and transfer the payload.
+
+3. Create a method with GET endpoint "/simpleIn$ite/dashboard/production". This method calls the repository interface method grp_Production().
+-> Method returns the JSON payload with return type "ResponseEntity<List<Map<String,Object>>>"
+
+    /**
+     * Method to return data of three columns - Date, materialType and Production weight in tons.
+     * Object of Repo_Production has a @Query (Native query) to join two tables and return the values.
+     * @return
+     */
+    @GetMapping(value = "/dashboard/production")
+    public ResponseEntity<List<Map<String,Object>>> getDashProduction(){
+        List<Map<String,Object>> listObject = production_material_impl.grp_Production();
+        ResponseEntity<List<Map<String,Object>>> responseEntity = new ResponseEntity<List<Map<String,Object>>>(listObject, HttpStatus.OK);
+
+        return responseEntity;
+    }
+
+--> Test the endpoint at the localhost. Verify the payload.
+
+-----------------------------------------------------------------------------
+III. Create a Dashboard in React using react-chart-2 library and axios to consume the REST endpoint.
+
+4. Create a new folder for all the dashboard charts file. Create Bar_Daily_Production.js file.
+
+->  We need to import Bar and Line component from 'react-chartjs-2' library. Also, axios library to fetch the REST endpoint and parse the JSON
+payload.
+
+    import React, { useState, useEffect } from "react";
+    import { Bar, Line } from "react-chartjs-2";
+    import axios from "axios";
+
+5. Create a function chart(). Fetch the data using axios and print the data on console to validate the payload.
+
+    const chart = () => {
+
+        let material_type = [];
+        let production_weight = [];
+        let date = [];
+
+        axios
+        .get("http://localhost:5000/SimpleIn$ite/dashboard/production")
+        .then(response => {
+            // console.log(response)
+
+            for(const dataObject of response.data){
+                material_type.push(dataObject.Material_Type);
+                production_weight.push(parseFloat(dataObject.Total_Weight).toFixed(2));
+                date.push(dataObject.Date);
+            }
+            // console.log('Date =' + date + 'Weight = ' + production_weight);
+        })
+    }//End of chart()
+
+=> Iterate the payload response and add the data into array. A for loop iterates the response data.
+(NOTE: for loop in React use "OF" keyword instead of "IN" in normal JAVA for loop. EX: for x of response )
+    -> Fetch the Material_Type from dataObject and push in the material_type array.
+    -> NOTE: Production_Weight is float value and dataObject.Total_Weight returns String. Parse the value in float using parseFloat().
+        Adjust the floating point value by using parseFloat().toFixed() method to set decimal points.
+
+
+END :
+MOST IMP NOTE:
+    -> After the project runs on local machine, deploy the code to EC2 instance. Make sure to UPDATE the axios endpoint with AWS EC2 URL endpoint
+    to fetch the data from cloud.
+
+

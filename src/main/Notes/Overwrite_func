@@ -1,0 +1,22 @@
+*********************
+      ONSJHJSA 
+*********************
+
+Overwrite functionality: 
+
+UserStory: As a user, I can overwrite the trasactional data so that I can overwrite the correct data. 
+
+Workflow: 
+1. Insert the unique constraint to the Weight Ticket column. Delete all the duplicate entries for that column and insert the "UNIQUE CONSTRAINT"
+for the weight ticket column. 
+
+    -> UNIQUE CONSTRAINT does NOT allow any duplicate entries to be inserted in the column as a trasactional data. 
+
+    SQL Syntax:
+    ALTER TABLE INBOUND
+    ADD CONSTRAINT unique_contstraint_name UNIQUE inbound_weight_ticket
+
+2. API endpoint will throw the SQL Exception if a user tried to insert the duplicate data. This Exceptionc can be caught either at the backend
+API using springboot OR at front end at React API call [Within the async method to call API]
+
+3. Catch the SQL Exception at the React js front using the response error code between 400 and 600. 

@@ -1,0 +1,185 @@
+html { position: relative;
+    min-height: 100%; }
+body{
+    min-height: 100%;
+    display: flex;
+    flex-direction: column; 
+}
+
+div{
+    position: relative;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    /* background-color: bisque; */
+}
+
+.incoming-background {
+    
+    background-image: url("./InboundStyle/InboundRecyclingTruck.png");
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+    background-position: 84% 45%;
+    background-size: 550px 400px;
+}
+
+.container {
+    width:100%;
+    height: 100%;
+    /* background-color: bisque; */
+    overflow: auto;
+}
+
+.production-background {
+    
+    background-image: url("./ProcessedStyle/TopViewRevolution.jpg");
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+    background-position: 80% 40%;
+    background-size: 500px 500px;
+    /* background-position: center center; */
+}
+
+.sold-background {
+    
+    background-image: url("./SoldMaterialBgImage/SM_RecycleTruck.png");
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+    background-position: 80% 40%;
+    background-size: 700px 250px;
+    /* background-position: center center; */
+}
+
+.trash-background {
+    
+    background-image: url("./TrashOutBgImage/Trash_Dumping.png");
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+    background-position: 80% 40%;
+    background-size: 600px 400px;
+    /* background-position: center center; */
+}
+
+.machine-background {
+    
+    background-image: url("./MachineHoursBgImage/Machine_Clock_black.png");
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+    background-position: 80% 50%;
+    background-size: 500px 500px;
+    /* background-position: center center; */
+}
+
+.employeeTimesheet-background {
+    
+    background-image: url("./Employee_Timesheet/Time_Clock2.png");
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+    background-position: 80% 60%;
+    background-size: 500px 400px;
+    /* background-position: center center; */
+}
+
+.profile-background {
+    
+    background-image: url("./Profile_Page_Stylesheet/Profile_Page_Background.jpg");
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+    background-position: 80% 60%;
+    background-size: 500px 400px;
+    /* background-position: center center; */
+}
+
+.login-background {
+    
+    background-image: url("./Profile_Page_Stylesheet/Login_Page.jpg");
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+    background-position: 20% 20%;
+    background-size: 200px 200px;
+    /* background-position: center center; */
+}
+
+#wrapper {
+    min-height: 100%;
+    position: relative;
+}
+
+.footer {
+    width: 100%;
+    height: 60px;
+    position: relative;
+    bottom: 100%;
+    left: 0px;
+    text-align: center;
+    color: white;
+    background:rgb(7, 7, 7);
+ }
+
+ .confirm-bg-overwrite {
+    position: fixed;
+    display: none;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: #202020;
+    opacity: 0.55;
+    overflow: hidden; /* disable scrolling*/
+    z-index: 2; /* higher than all other items, but lower than 
+      the confirm box*/
+  }
+
+  .container-overwrite {
+    display: none;
+    flex-direction: column;
+    position: fixed;
+    background-color: #f37736;
+    width: 230px;
+    top: 75%;
+    left: 50%;
+    transform: translate(-50%, -75%);
+    border-radius: 0.3rem;
+    padding: 1rem;
+    z-index: 5; /* Higher than the z-index of the background */
+  }
+  
+  .confirmation-text {
+    display: flex;
+    color: white;
+    margin: 0.5rem 0 2rem;
+    text-align: center;
+    line-height: 2rem;
+    font-size: 1.1rem;
+  }
+  
+  .button-container {
+    display: flex;
+    margin-top: auto;
+    justify-content: space-between;
+  }
+  
+  .confirmation-button, delete-button {
+    display: inline-flex;
+    background-color: #cc0000;
+    color: white;
+    padding: 0.7rem 1.4rem;
+    border: none;
+    border-radius: 0.3rem;
+    font-size: 1rem;
+  }
+  
+  .cancel-button {
+    background-color: #999999;
+  }
+  
+  .confirmation-button:hover {
+    background-color: red;
+    cursor: pointer;
+  }
+  
+  .cancel-button:hover {
+    background-color: #b2b2b2;
+    cursor: pointer;
+  }

@@ -1,0 +1,108 @@
+******************************** ONSJHJSA ******************************
+************************************************************************
+
+CR #1001 
+-> Create a separate table for "Landfill Owner" for Trashout reporting module. 
+
+User Story: As a user, I want to select Landfill owner name so that I can report trashout ticket entry. 
+
+-> Initially, I used supplier table in "Select supplier name" input dropdown. The reason behind this was supplier for Inbound material and Trashout are same. I do NOT want to replicate the table. To avoid duplication I used the same table. 
+
+-> As per Change Request, stakeholders want a separate table for "Select Landfill" in Trashout input module. 
+
+RESOLUTION:
+1. Create an Entity table under "model" named "Landfill_owner" with fields - ID, Name. 
+PK-FK relationship - One Landfill_owner can have many Trashout tickets. => Many Trashout Ticket has the same Landfill_owner. 
+
+One TO Many : Landfill_owner TO Trashout
+
+-> At Many side (class with Many relationship) should specify "CascadeType - Persist"
+
+    @ManyToOne(cascade = CascadeType.PERSIST)
+    private Landfill_Owner landfill_owner;
+
+2. Create interface Reporsitoty which extends JpaRepository<Class_Name, Class_ID_Type>
+    -> JpaRepository has default methods for basic SQL queries. Like for "Select *" => findAll() 
+    "Select * where Id = abc" => findById("abc") and many more. 
+
+3. Inside the repository define a method to find the Landfill_Owner_Id as React form will pass
+Landfill_Owner_Name. 
+
+        public interface Repo_Landfill_Owner extends JpaRepository<Landfill_Owner,Long> {
+
+            @Query("Select Landfill_owner_id from Landfill_Owner where Landfill_owner_name = ?1")
+            Long getLandfillOwnerId(String Landfill_Owner_Name);
+        }
+
+4. In the controller to create endpoint, dev needs to Autowired the Repository instance. 
+Autowired automatically provides object of the class when needed. I am using constructor method for Autowiring. (Another method is setter method for Authowiring)
+
+    private Repo_Landfill_Owner repo_landfill_owner;
+
+    public constructor(Repo_Landfill_Owner repo_landfill_owner){
+        this.repo_landfill_owner = repo_landfill_owner
+    }
+
+
+4. Now, define REST API endpoint to get All Landfill Owner Name from the table. 
+This data is required in React Form dropdown menu to select Landfill Owner.  
+
+    @PreAuthorize("hasRole('USER') or hasRole('ADMIN')")
+    @GetMapping(value = "/getLandfillOwner")
+    public ResponseEntity<Collection<?>> getAllLandfillOwners(){
+        ResponseEntity<Collection<?>> response_landfill_owner = new ResponseEntity<Collection<?>>(repo_landfill_owner.findAll(),
+                HttpStatus.OK);
+        return response_landfill_owner;
+    }
+
+5. Now, In frontend, put Landfill_Owner endpoint in "async componentDidMount" function to get
+list of Landfill owner in the dropdown menu. {Verify if user logged in / Authorized with JWT token in
+the local storage of the browser. }    
+
+    async componentDidMount(){
+
+        const user = JSON.parse(localStorage.getItem('user'));
+
+        if(!user){
+            this.props.history.push("/login")
+        }
+        else{
+            const myHeaders = new Headers();
+            myHeaders.append('Authorization', 'Bearer ' + user.accessToken);
+
+            const response = await fetch('/SimpleIn$ite/getLandfillOwner',{
+                method: 'GET',
+                headers: myHeaders,
+            });
+            const body = await response.json();
+            this.setState( {suppliers : body, isLoading : false} )
+        }   
+    }
+
+6. Now, create a "map" function to get the list of Landfill Owners and store in a variable.
+Use this variable in dropdown menu. Make sure, name in map function should match the name in 
+response payload from REST endpoint.
+
+    let landfillOwnerList = 
+            landfillOwners.map(landfillOwner => 
+                    <option value = {landfillOwner.landfill_owner_name} key = {landfillOwner.landfill_owner_id}>
+                           {landfillOwner.landfill_owner_name} 
+                    </option>
+                    )
+
+-> Make necessary changes in the Confirmation dialogue box. Update "ConfirmTrashout.js"                    
+
+7. Make sure, this.state has the correct payload to send backend. In backend, get the Landfill owner name and fetch Landfill_Owner_Id using JpaRepository getLandfillOwnerId method. 
+
+8. Make changes in "/SimpleIn$ite/trashout/entry" endpoint to save the entry in the database. 
+
+=================================================================================================================================================
+=================================================================================================================================================
+
+CR #1002:
+
+As a user, I should be able to report the Accidents. Key parameters required are - Date, Comments field.
+
+Date - The data point is required to report the date of accident.
+Comments - The data point required to report the accident details.
+

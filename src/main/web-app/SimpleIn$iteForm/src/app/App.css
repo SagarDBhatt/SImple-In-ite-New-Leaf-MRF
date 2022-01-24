@@ -1,0 +1,103 @@
+.App {
+  text-align: center;
+}
+
+.App-logo {
+  height: 40vmin;
+  pointer-events: none;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .App-logo {
+    animation: App-logo-spin infinite 20s linear;
+  }
+}
+
+.App-header {
+  background-color: #1559e2;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font-size: calc(10px + 2vmin);
+  color: white;
+}
+
+.App-link {
+  color: #61dafb;
+}
+
+@keyframes App-logo-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* label {
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-end;
+  text-align: right;
+  line-height: 24px;
+  margin-bottom: 20px;
+}
+
+input {
+  height: 20px;
+  flex: 0 0 200px;
+  margin-left: 20px;
+} */
+
+.field input + label {
+  position: absolute;
+  top: 24px;
+  left: 16px;
+  font-family: 'Gotham SSm A', 'Gotham SSm B', sans-serif;
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 24px;
+  color: #ffffff;
+  opacity: 0;
+  pointer-events: none;
+  transition: 0.1s all ease-in-out;
+}
+.field input + label.error {
+ color: #ec392f;
+}
+
+.header-contact, .header-contact a {
+  color: #fff;
+}
+.header-contact {
+  background-color: #009444;
+}
+
+/* .nav-link[aria-current="page"] {
+  color: #000;
+  opacity: 1;
+} */
+
+.active {
+  border-bottom: 3px solid #009444;
+  transition: border-bottom .5s ease-in-out;
+}
+
+/* @import url('https://fonts.googleapis.com/css2?family=Nunito:ital,wght@1,600&display=swap'); */
+/* The style applied to background of the NavBar */
+.header-contact{
+  background-color: #009444;
+  font-family: "Montserrat", sans-serif;
+  color:white !important;
+}
+
+.background-image{
+    background-image: url("./Revolution_Icon.jpg");
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+    background-position: 80% 60%;
+    background-size: 500px 400px;
+}

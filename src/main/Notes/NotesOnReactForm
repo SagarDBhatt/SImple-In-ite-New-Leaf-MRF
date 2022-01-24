@@ -1,0 +1,622 @@
+********************************* ONSJHJSA ***************************************************
+**********************************************************************************************
+
+1. Create a class. Initial two lines of code. 
+    imrc -> import React, { Component } from 'react';
+    cc ->   class xxxx extends Component {
+                state = {  }
+
+
+                 render() { 
+                     return ( <h2>This is Sold Material </h2> );
+                }
+            }
+
+export default xxxx;
+
+Add -> Import object of class AppNav.js.Include object into render() function to enable
+    navigation bar into the class. 
+
+    ##Code Snippet: 
+
+    import AppNav from './AppNav'
+
+    class employeeTimesheet extends Component {
+    state = {  }
+    render() { 
+        return ( 
+            <div>
+                <AppNav />  #Make sure to import <AppNav /> module to enable Navigation Bar.
+                    <h2>This is employee Timesheet</h2> 
+            </div>
+         );
+    }
+}
+
+2. Chage the Navigation link from 'AppNav.js'. For eg: When a categoryUser click on Sold Material button
+    then 'localhost:3000/soldMaterial' link should be called. Import AppNav.js file into class 
+    to create a Navigation link into the page.
+
+
+3. Import 'SoldMaterial' component in main class i.e. 'App.js'. Route the page to soldMaterial class 
+    when categoryUser hit 'localhost:3000/soldMaterial' (Sold Material button).
+
+    import soldMaterial from './SoldMaterial'
+
+class App extends Component {
+  state = {  }
+  render() { 
+    return ( 
+      <Router>
+        <Switch> 
+          <Route path='/soldMaterial' exact={true} component={soldMaterial} />
+        </Switch>
+    </Router>
+     );
+  }
+}
+ 
+export default App;
+
+4. Create an entity class. Add the attribute of the class which will automatically created a SQL table
+    in database with class attributes as the column names. 
+
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @Data
+    @Entity
+    @Table(name = "Customer_dim")
+    public class Customer_dim {
+
+        @Id
+        @GeneratedValue(strategy = GenerationType.AUTO)
+        private Long customer_id;
+
+        @Getter
+        @Setter
+        private String customer_Name;
+        .....
+        .....
+    }    
+
+    @NoArgsConstructor -> Creates a No Argument constructor. 
+    @AllArgsConstructor -> Creates all Argument constructor.
+    @Data -> lombok library annotation. Creates @Getter & @Setter method for private attributes.
+    @Entity -> Springboot annotation specify the class should be mapped in SQL database.
+    @Table -> creates a table based on the class name and attributes. 
+
+    @Id -> Make the primary key of the table. 
+    @GeneratedValue(strategy = GenerationType.IDENTITY) -> automatically generates the primary key for each new row of data.
+
+=> Note: If we used @GeneratedValue(strategy = GenerationType.AUTO), then we might get an error at the time
+    of sending the data to the database because we asked Spring to generate the ID automatically for the 
+    each row entries. But GenerationType.AUTO does not assigned IDENTITY= 'YES' amd increament by 1 into SQL
+    database. 
+
+    -> To resolve this issue, we need to manually assigned identify = true and increament by 1 for the ID 
+    column. Now when we insert the data via REST API using JPA and categoryUser does not need to specify the ID.
+
+5. Create an API to retrieve list of 'Suppliers', 'Customers', 'MaterialTypes' ect. 
+    -> Create a interface of Repository and extends JpaRepository<className, Id>. 
+    -> Create a interface instance in controller class. Autowired interface by suppling interface instance
+    in a controller class constructor. 
+    -> Create a controller method that retrieve list of 'Suppliers', 'Customers', 'MaterialTypes' ect. 
+
+==> Get API to get the Collection of data from the table. 
+    i. Create a GET API with end point as 'getEmployees'. 
+    ii. Function should return 'ResponseEntity' object with the Generic class name. 
+
+    ##Code Snippet. 
+    @GetMapping(value = "/getEmployees")
+    public ResponseEntity<Collection<Employee_dim>> getAllEmployees(){
+        ResponseEntity<Collection<Employee_dim>> respGetAllEmployees = new
+                ResponseEntity<Collection<Employee_dim>>(repo_employee_dim_impl.findAll(),HttpStatus.OK);
+        return respGetAllEmployees;
+    }        
+
+Endpoint: 'http://localhost:8080/SimpleIn$ite/getEmployees' returns the JSON payload of all the employees. 
+
+6. After API to getCustomers is ready. Move to React.js. Create a constructor(prosp). call this.state = {}. 
+    -> Pass array in state. 
+
+    ##Code Snippet
+    constructor(props){
+        super(props)
+
+        this.state={
+            customers : [],
+            isLoading : true
+        }
+    }
+
+7. Create a function to fetch list of objects from API.
+    -> Function needs to be 'Async' i.e. when needed it calls and fetch the details. 
+    -> func type should be 'componentDidMount()'
+    -> fetch API data. Convert into JSON. 
+    -> Pass the value in 'customers' array from the state. 
+    -> Set the values in the state. 
+
+    ##Code Snippet
+    async componentDidMount(){
+        const responseCustomers = await fetch("/SimpleIn$ite/getCustomers");
+        const bodyCustomers = await responseCustomers.json();
+
+        const respMaterialType = await fetch("/SimpleIn$ite/getMaterials");
+        const bodyMaterialType = await respMaterialType.json();
+        this.setState( {customers : bodyCustomers, isLoading : false, 
+                        materialCategories : bodyMaterialType } )
+    }     
+
+8. Now start coding in the 'render()' function.
+    -> Check if the values have been loaded completely or not. Use 'isLoading' var to verify. 
+    -> Do not forget to initialize the variable first inside render(). Pass state value to the variables.
+    ##Code Snippet
+    render() {  
+        const title = <h3>Sold Material Reporting </h3>
+        const {customers,materialCategories,isLoading} = this.state
+
+
+        if(isLoading)
+        return(
+            <div>
+                <AppNav>Loading...</AppNav>
+            </div>
+        );
+
+     -> Create a listOfCustomers, ListOfSuppliers as a optionlist in render().
+
+     ## Code Snippet
+
+     let customersList = customers.map(customer => 
+                <option value = {customer.customer_id} key = {customer.customer_id}>
+                    {customer.customer_Name}
+                </option> 
+            )
+
+    MIMP:: Here, please make sure to use the variable name in the map same as returned in the API JSON payload.
+      for eg. In my 'getCustomer' API retruned JSON payload with var as 'customer_Name'. 
+      Now inside the 'map' function make sure to have a exact same spelling. (small 'c' and capital 'N').           
+
+9. Now, create containers to start building form to report the entry. 
+
+    ##Code Snippet
+     return ( 
+            <div>
+                <AppNav />
+                <Container>
+                    {title}
+
+                </Container>
+            </div>
+        );
+
+    -> Create a Form element and map the submit action with 'handleSubmit()' function
+    
+        <Form onSubmit= {this.handleSubmit}>
+                        
+        </Form>    
+
+    -> Create 'handleChange' function to handle the change in form element such as update in weightTicket textbox.
+    -> Create 'handleDateChange' function to handle change in date from Datepicker module in front end. 
+
+        <FormGroup>
+            <label for='customersName'>Customers</label>{' '}
+                <select name='customersName' onChange = {this.handleChange}>
+                    {customersList}
+                </select>
+        </FormGroup>
+
+
+10. Create an empty array with the elements name same as the name attribute in the form tags.   
+
+        emptyItem = {
+                customersName : '',
+                materialType : '',
+                soldWeightTicketNumber : '',
+                BOLNumber:'',
+                date : new Date(),
+                SoldWeightInLbs:'',
+                SoldBales:''
+            }
+
+   -> Set 'items' array element inside the state and set it to 'emptyItem'.
+        constructor(props){
+            super(props)
+
+            this.state={
+                customers : [],
+                materialCategories : [],
+                isLoading : true,
+                date : new Date(),
+                items : this.emptyItem
+            }
+        }         
+
+11. Now create 'handleChange' method to identify the handle change. 
+    i.pass event as a parameter. 
+    ii. create var target = event.target and value = event.target.value
+    iii. var name = target.name => This property map the form label element name and pass the value.
+
+        for eg:         <FormGroup>
+                            <label for='customersName'>Customers</label>{' '}
+                            <select name='customersName' onChange = {this.handleChange}>
+                                {customersList}
+                            </select>
+                        </FormGroup>  
+
+        -> Here, name of the 'Customer' element is 'CustomerName'. value var gets the value that a customer
+            selects from dropdown list.                   
+
+    iv. create a var item and assign value of item var from stete. Assign the value to item var for specific name.
+        i.e. CustomersName inside emptyItem array.  
+            
+            let item = {...this.state.item};
+            item[name] = value;
+
+    v. Set the value of the item array into state. 
+        this.setState({item});  //Setting the value of item with the updated value selected in the form
+
+    handleChange(event){
+        const target= event.target;
+        const value= target.value;
+        const name = target.name;
+
+        let item = {...this.state.item};
+        item[name] = value;     //code update the value selected in the form to items array. 
+
+        this.setState({item});  //Setting the value of item with the updated value selected in the form
+        console.log(this.state);    //show value on the console (press F12 and check console for the updated value)
+    }
+
+==> MIMP: In the constructor, bind the handleChange method. Otherwise I will get the error 'state not defined'
+
+    constructor(props){
+        super(props);
+
+        this.state = { 
+            isLoading : true,
+            expneses : [],
+            categories : [],
+            date : new Date(),
+            item : this.emptyItem
+         }
+
+         this.handleSubmit = this.handleSubmit.bind(this);
+         this.handleChange = this.handleChange.bind(this);
+         this.handleDateChange = this.handleDateChange.bind(this);
+    
+    }
+
+12. Create 'handleDateChange' function. 
+
+    i. pass date as argument. create a item variable from state. pass the new date and set the item var to state. 
+
+    handleDateChange(date){
+        let item = {...this.state.item};
+        item.date = date;
+        this.setState({item});
+    }
+
+==> MIMP: Do not forget to bind the method inside the constructor. 
+
+13. Create 'handleSubmit' method.     
+
+    i. First, I need to create an api to save the form input into SQL database. 
+    ii. @RequestBody takes the form input as a String, convert string into JSONObject. 
+    iii. Convert each column parameter from JSONObject to individual variable.
+
+    -> Now, I need to create a Repository which extends JpaRepository to save the object inside database. 
+
+    public String postSoldEntry(@RequestBody String soldMaterial) throws JSONException, ParseException {
+
+/*        emptyItem = {
+                customersName : '',
+                materialType : '',
+                soldWeightTicketNumber : '',
+                BOLNumber:'',
+                date : new Date(),
+                SoldWeightInLbs:'',
+                SoldBales:''
+    }*/
+        JSONObject soldMaterialObj = new JSONObject(soldMaterial);
+
+        String customerName = soldMaterialObj.getString("customersName");
+
+        //Long.parseLong(customerName) giving the same supplier Id mapped in database SO I didnt create 'getSupplierID'
+        // to fetch the supplierID from SQL db.
+        Long customerID = Long.parseLong(customerName);
+        String materialType = soldMaterialObj.getString("materialType");
+        Long soldWeightTicketNumber = soldMaterialObj.getLong("soldWeightTicketNumber");
+        Long BOLNumber = soldMaterialObj.getLong("BOLNumber");
+        Double SoldWeightInLbs = soldMaterialObj.getDouble("SoldWeightInLbs");
+        Double SoldWeightInTons = SoldWeightInLbs / 2000.0;
+        java.util.Date date = new SimpleDateFormat("yyyy-MM-dd").parse(soldMaterialObj.getString("date").toString());
+        java.util.Date systemDate = new Date();
+
+        soldMaterialImpl.saveSoldMaterial(soldBales,SoldWeightInLbs,SoldWeightInTons,
+                systemDate, BOLNumber, soldDate, soldWeightTicketNumber,
+                 customerID, materialId,1);
+
+        return "Success!!";
+    }
+
+=> Create 'SoldMaterial' interface repository. Create a saveSoldMaterial method using native SQL query
+    to save data into SQL.   
+    
+    public interface Repo_SoldMaterial extends JpaRepository<SoldMaterial_fact,Long> {
+        
+        @Modifying
+        @Transactional
+        @Query(value = "  Insert into fact_sold_material ([number_of_sold_bales]\n" +
+                "      ,[sold_weight_lb]\n" +
+                "      ,[sold_weight_tons]\n" +
+                "      ,[system_created_date]\n" +
+                "      ,[sold_bol_number]\n" +
+                "      ,[sold_material_date]\n" +
+                "      ,[sold_weight_ticket_number]\n" +
+                "      ,[customer_dim_customer_id]\n" +
+                "      ,[material_dim_material_id]\n" +
+                "      ,[sold_material_id])\n" +
+                "\t  values(?1,?2,?3,?4,?5,?6,?7,?8,?9, ?10)", nativeQuery = true)
+        void saveSoldMaterial(Long soldBales,Double SoldWeightInLbs,Double SoldWeightInTons,
+                            java.util.Date systemDate,Long BOLNumber,java.util.Date soldDate,Long soldWeightTicketNumber,
+                            Long customerID,Long materialId, Integer number);
+    } 
+
+============================================================================================
+
+** Add new Module in the Front end. 
+
+-> Let's add another module of 'Trash Material' entry. 
+    Backend : Entity Class that converts into SQL table; API in controller to fetch list of data;
+        repository interface and extend JpaRepository, create reporsitory object in contoller and
+        Autowired by constructor; create native sql query to save object in the database. 
+
+1. Create trashOut.js file. Create a Navigation link in 'AppNav.js' file
+    
+    <NavItem>
+        <NavLink href="/trashOut">Trash out</NavLink>
+    </NavItem>
+
+2. Import trashOut from '/trashout' and 'Route' trash in App.js file. 
+
+import trashOut from './trashOut'
+
+class App extends Component {
+  state = {  }
+  render() { 
+    return ( 
+      <Router>
+        <Switch> 
+          {/* <Home/> */}
+          <Route path='/' exact = {true} component={Home}/>
+          <Route path='/api/material' exact = {true} component={Material_dim}/>
+          <Route path='/Production' exact = {true} component={Production}/>
+          <Route path='/incomingMaterial' exact= {true} component={incomingMaterial} />
+          <Route path='/soldMaterial' exact={true} component={soldMaterial} />
+          <Route path='/trashOut' exact={true} component={trashOut} />
+        </Switch>
+    </Router>
+     );
+  }
+}
+ 
+export default App;
+
+3. Create a basic file. Import necessary libraries. 
+
+
+============================================================================================
+MIMP Notes: We are annotating id column with @GeneratedValue(strategy = GenerationType.IDENTITY)
+This will tell database that Id value will automatically increament. 
+
+Make sure to set 'isIdentity' column Yes and increament by '1' for Id column
+otherwise you will get an error say null values are not allowed in the id column as the 
+identify is not yet set. 
+============================================================================================
+
+
+_____________________________________________________________________________________
+    Link for Confirm dialog box -- https://itnext.io/add-confirmation-dialog-to-react-events-f50a40d9a30d
+_____________________________________________________________________________________
+
+Notes On Confirmation Box: 
+
+1. Issue - 1 : I was unable to get the Employee Name in the confirmation box. 
+
+Resolution: In the <option> tag of dropdown, I was passing employeeId as a Key and value. This was causing the
+issue. Now, as I change the value = employee.employeeName then I can get the employee Name in the confirmation
+box. 
+
+    let employeeList = employees.map(employee => 
+            <option key={employee.employee_id} value={employee.employee_Name}>
+                {employee.employee_Name}    
+            </option>)
+
+The only catch is that now I am passing the employee Name to the REST API which stores the value in the database. 
+I need to pass the employee ID as it is a Foreign key in the table of relational database. 
+I need to create a method to fetch the id from the table. This will resolve the issue. 
+
+2. Issue - 2: Employee Name drop down default has the first name of the employee in our case its Ruth. 
+If a person, do not change the value and leave the Ruth as it is then the value will not pass. 
+
+Resolution - I put a "select employee Name" as the first option so that a categoryUser has to select the valid employee
+Name from the drop down. [In a confirmation window I am passing the employeeNameList so even if categoryUser
+does not select any name, "select employee Name" will not appear in the confirmation window]
+
+        <FormGroup>
+                <label for='employeeName'>Employee</label>{' '}
+                <select name='employeeName' onChange={this.handleChange}>
+                    <option>Select Employee Name</option>
+                    {employeeList}
+                </select>
+        </FormGroup>
+
+3. date : new Date() in the emptyList is needed to show the default selected value of Date in the Date field.
+
+emptyItem={
+        employeeName : '',
+        date : new Date(),
+        Total_Worked_Hours: '',
+        Break_Hours: ''
+    }
+
+<FormGroup>
+    <label for='timesheetDate'> Date </label>{' '}
+    <DatePicker selected={this.state.empTimesheet.date} onChange={this.handleDateChange} />
+</FormGroup>
+
+=============================================================================================================
+
+Issue 3: Date was not populating in the confirmation box. 
+
+-> Error was coming as Date is object and object can not be passed in the child element of Confirm.js class. 
+To resolve this there are two approaches.
+
+    i. I need to pass either string of object -  date.toStrin()
+         
+         //empDate = {(this.state.timesheetDate).toString()}
+
+         - This will provide the date in long form. I need formatted date. To do that I need to use 'moment' class.
+
+    ii. I need to use 'moment' class to format the date element. 
+
+        import moment from 'moment'
+        empDate = {moment(this.state.timesheetDate).format('MM-DD-yyyy')}
+
+        - This gives the correct date format in the confirmation dialogue box. 
+
+=============================================================================================================
+
+Issue 3: Material_ID, Customer_ID, Supplier_ID passed in the database. 
+
+-> I change the material_type, customer_name, supplier_name in the dropdown menu. This will create an issue 
+    in my current SQL query to insert the ID in the database becasue of primary key - foreign key relationship. 
+
+-> I updated value as value = {customer.customer_Name} AND value={material.material_Type}.
+
+        let customersList = customers.map(customer => 
+                <option value = {customer.customer_Name} key = {customer.customer_id}>
+                    {customer.customer_Name}
+                </option> 
+            )
+
+        let materialList = materialCategories.map(material => 
+                <option value={material.material_Type} key={material.material_ID}>
+                    {material.material_Type}
+                </option>
+            )  
+
+-> To solve this, I need to create a function in interface to get an ID value by passing the customer Name or 
+    material type. 
+
+    @Query(value = "select customer_id from Customer_dim where customer_Name = ?1 ")
+    Long getCustomerID(String customerName);
+
+=============================================================================================================
+=============================================================================================================
+
+Enhancement 1: 
+As a user, I should select the date in a range of 14 days (Max back entry of 2 weeks) 
+So that User can make back entry of maximum 2 weeks. 
+
+Sol: I used DatePicker component in React. I defined maxDate as current date and 
+    MinDate as current date - 14 days. 
+
+    <DatePicker 
+        selected={this.state.inMaterials.date} 
+        maxDate={new Date()} minDate= {addDays(new Date(), -14)}
+        onChange={this.handleDateChange} 
+    />  
+
+-> I implemented addDays(date, range) to define the min date. 
+    " import { addDays } from "date-fns"; " is required. 
+
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+Enhancement 2: 
+As a User, I should insert only 2 decimal digits 
+<input type='number' pattern="[0-9]*" inputmode="numeric" step=".01"
+    placeholder='Ex: 3,456.67' 
+    name='IncomingWeightLb' id='IncomingWeightLb' 
+    onChange={this.handleChange}>
+</input>
+
+=============================================================================================================
+=============================================================================================================
+
+Enhancement 3: 
+Auto-closing alert message/success message notification within a few 
+seconds (Eg. 2 seconds here). No need to acknowledge the message 
+box by hitting the "OK" button. The idea is to save a significant amount of 
+time when reporting multiple entries. 
+
+Solution: 
+1. import { Alert } from "reactstrap";
+2.  Set a visibility flag in the state. 
+
+    this.state = {
+      visible: false
+    };
+
+3. Create a function which set visibility flag to True and then set it false 
+after 2 seconds. Also, reload the window after 2 seconds. IMP - Bind the function
+in the constructor. 
+
+onShowAlert = () => {
+    this.setState({ visible: true }, () => {
+      window.setTimeout(() => {
+        this.setState({ visible: false });
+        window.location.reload(1);
+      }, 2000);
+    });
+  };
+
+  constructor(props) {
+    super(props);
+
+    this.onShowAlert = this.onShowAlert.bind(this);
+  }
+
+4. Call the function in the handleSubmit method to set the visibility flag to true.
+
+ async handleSubmit(event) {
+    const inMaterials = this.state.inMaterials;
+    const ROOT_URL = "http://simpleinsite.us-east-2.elasticbeanstalk.com";
+
+    await fetch(ROOT_URL + "/SimpleIn$ite/SingleStream/entry", {
+      method: "POST",
+      headers: {
+        Accept: "application/json",
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(inMaterials),
+    })
+      .then((response) => {
+        if (response.status >= 400 && response.status < 600) {
+          alert("Bad response from server");
+          throw new Error("Bad response from server");
+        }
+      })
+      .then((newresponse) => {
+        //Below function shows the alert message with customized text and reload the
+        // window after 2 seconds. SetTimeOut(func){ function, timeout in ms} is used for that purpose
+        this.onShowAlert();
+      })
+      .catch((err) => {
+        console.log("Error is", err);
+        alert("Alert");
+        AuthService.logout();
+        this.props.history.push("/login");
+        window.location.reload();
+      });
+  }
+
+5. Create <Alert> tag to show custom alert message. Put the tag after first 
+div tag to show message at the top. 
+
+<div className="container">
+        <Alert color="info" isOpen={this.state.visible}>
+          Congratualtions!!! The data entered successfully!
+        </Alert>
+</div>
